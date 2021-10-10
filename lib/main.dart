@@ -6,7 +6,15 @@ import 'package:fountain_challenge/models/show.dart';
 void main() {
   runApp(
     MaterialApp(
-      home: FountainChallenge(),
+      home: Builder(
+        builder: (BuildContext context) {
+          final MediaQueryData data = MediaQuery.of(context);
+          return MediaQuery(
+            data: data.copyWith(textScaleFactor: 1.0),
+            child: FountainChallenge(),
+          );
+        },
+      ),
       debugShowCheckedModeBanner: false,
     ),
   );
@@ -20,8 +28,6 @@ class FountainChallenge extends StatefulWidget {
 }
 
 class _FountainChallengeState extends State<FountainChallenge> {
-  late Show show;
-
   @override
   void initState() {
     loadJsonAsset();
@@ -32,23 +38,48 @@ class _FountainChallengeState extends State<FountainChallenge> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: Row(
-          children: [
-            Flexible(flex: 2, child: Image.network(show.image)),
-            Flexible(
-              flex: 8,
-              child: Column(
-                children: [
-                  showText(show.title),
-                  showText(show.description),
-                  showText(show.publisher),
-                  showText(show.link),
-                  showText(show.following ? "" : "not " + "followed by you"),
-                ],
-              ),
-            ),
-          ],
-        ),
+        flexibleSpace: FutureBuilder<Show>(
+            future: loadJsonAsset(),
+            builder: (context, snapshot) {
+              return snapshot.connectionState == ConnectionState.waiting
+                  ? Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
+                  : Row(
+                      children: [
+                        Flexible(
+                          flex: 2,
+                          child: Image.network(
+                            snapshot.data!.image,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  value: loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Flexible(
+                          flex: 8,
+                          child: Column(
+                            children: [
+                              showText(snapshot.data!.title),
+                              showText(snapshot.data!.description),
+                              showText(snapshot.data!.publisher),
+                              showText(snapshot.data!.link),
+                              showText(snapshot.data!.following
+                                  ? ""
+                                  : "not " + "following"),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+            }),
       ),
       body: Center(
         child: Text('Fountain Challenge'),
@@ -65,14 +96,10 @@ class _FountainChallengeState extends State<FountainChallenge> {
     );
   }
 
-  void loadJsonAsset() async {
+  Future<Show> loadJsonAsset() async {
     String data = await DefaultAssetBundle.of(context)
         .loadString("mocks/appbar_mock.json");
 
-    print(data);
-
-    setState(() {
-      show = Show.fromJson(jsonDecode(data));
-    });
+    return Show.fromJson(jsonDecode(data));
   }
 }
