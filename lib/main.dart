@@ -89,9 +89,12 @@ class _FountainChallengeState extends State<FountainChallenge> {
 
   Widget showText(String text) {
     return Flexible(
-      child: Text(
-        text,
-        textScaleFactor: MediaQuery.of(context).textScaleFactor,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          text,
+          textScaleFactor: MediaQuery.of(context).textScaleFactor,
+        ),
       ),
     );
   }
