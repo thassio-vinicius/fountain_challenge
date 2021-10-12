@@ -38,48 +38,52 @@ class _FountainChallengeState extends State<FountainChallenge> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: FutureBuilder<Show>(
-            future: loadJsonAsset(),
-            builder: (context, snapshot) {
-              return snapshot.connectionState == ConnectionState.waiting
-                  ? Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    )
-                  : Row(
-                      children: [
-                        Flexible(
-                          flex: 2,
-                          child: Image.network(
-                            snapshot.data!.image,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  value: loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!,
-                                ),
-                              );
-                            },
+        flexibleSpace: SafeArea(
+          child: FutureBuilder<Show>(
+              future: loadJsonAsset(),
+              builder: (context, snapshot) {
+                return snapshot.connectionState == ConnectionState.waiting
+                    ? Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      )
+                    : Row(
+                        children: [
+                          Flexible(
+                            flex: 2,
+                            child: Image.network(
+                              snapshot.data!.image,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    value:
+                                        loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        Flexible(
-                          flex: 8,
-                          child: Column(
-                            children: [
-                              showText(snapshot.data!.title),
-                              showText(snapshot.data!.description),
-                              showText(snapshot.data!.publisher),
-                              showText(snapshot.data!.link),
-                              showText(snapshot.data!.following
-                                  ? ""
-                                  : "not " + "following"),
-                            ],
+                          Flexible(
+                            flex: 8,
+                            child: Column(
+                              children: [
+                                showText(snapshot.data!.title),
+                                showText(snapshot.data!.description),
+                                showText(snapshot.data!.publisher),
+                                showText(snapshot.data!.link),
+                                showText(snapshot.data!.following
+                                    ? ""
+                                    : "not " + "following"),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-            }),
+                        ],
+                      );
+              }),
+        ),
       ),
       body: Center(
         child: Text('Fountain Challenge'),
